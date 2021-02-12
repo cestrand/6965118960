@@ -4,10 +4,14 @@ import svm.SVMParameter;
 import svm.SVMProblem;
 import weka.Matrix;
 import weka.SiecB;
+import weka.classifiers.Evaluation;
+import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Standardize;
+
+import java.util.Random;
 
 public class AnalizaGlass {
 
@@ -78,9 +82,21 @@ public class AnalizaGlass {
 //		wykonajSiecBHC(dane, 2);
 //		wykonajSiecBHCReverse(dane, 2);
 
-		// multilayer perceptron
-		wykonajSVM(dane);
+		wykonajMultilayerPerceptron(dane);
+//		wykonajSVM(dane);
 		// cross-validacje z macierzami pomyłek
+	}
+
+	private static void wykonajMultilayerPerceptron(Instances dane) throws Exception {
+		MultilayerPerceptron mp = new MultilayerPerceptron();
+		mp.setHiddenLayers("5,3");
+		mp.setLearningRate(0.3);
+		//mp.setGUI(true);
+		mp.buildClassifier(dane);
+		System.out.println(mp);
+		Evaluation ev = new Evaluation(dane);
+		ev.crossValidateModel(mp, dane, 30, new Random(123));
+		System.out.println(ev.toMatrixString());
 	}
 
 	private static void wykonajSVM(Instances dane) throws Exception {
