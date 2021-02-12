@@ -7,16 +7,16 @@ import weka.core.converters.ConverterUtils.DataSource;
 import weka.core.matrix.Matrix;
 import weka.core.pmml.jaxbbindings.InstanceField;
 
-public class projekt {
+public class Projekt {
 	public static void main(String[] args) throws Exception {
-		Instances dane = DataSource.read("C:/Users/tpt48/Documents/Data/grzyby.arff");
+		Instances dane = DataSource.read("zasoby/mushrooms.arff");
 //		System.out.println(dane.toString());
 //		System.out.println(dane.classIndex());
 		dane.setClassIndex(4);
 		Attribute klasa = dane.classAttribute();
 //		System.out.println(klasa);
 		//klasyfikacja
-		BayesNet bn = new BayesNet(); // parametry s¹ - domyœlne
+		BayesNet bn = new BayesNet(); // parametry sï¿½ - domyï¿½lne
 		String[] par =bn.getOptions();
     	par[5] = "2";
 		bn.setOptions(par);
