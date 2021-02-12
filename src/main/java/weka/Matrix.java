@@ -27,6 +27,13 @@ public class Matrix {
         return bledy;
     }
 
+    /**
+     * Wierszem jest rzeczywista wartość, kolumna to predykcja.
+     * @param org
+     * @param dec
+     * @param numClasses
+     * @return
+     */
     public static int[][] confMatrix(double[] org, double[] dec, int numClasses) {
         int[][] M = new int[numClasses][numClasses];
         for (int i = 0; i < org.length; i++) {

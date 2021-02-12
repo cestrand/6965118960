@@ -1,3 +1,10 @@
+/**
+ * LogScore is
+ * calculated by adding the minus logarithm of the probability assigned by the classifier to the correct class and gives
+ * an idea of how well the classifier is estimating probabilities
+ * (the smaller the score the better the result). -- https://www.aaai.org/Papers/FLAIRS/2003/Flairs03-066.pdf
+ */
+
 package weka;
 
 import java.io.FileWriter;
@@ -279,5 +286,13 @@ public class SiecB extends BIFReader {
 	 */
 	public void PrintData() {
 		System.out.println(this.m_Instances);
+	}
+
+	public double[] predict(Instances dane) throws Exception {
+		double[] predykcje = new double[dane.numInstances()];
+		for(int i = 0; i < predykcje.length; i++) {
+			predykcje[i] = classifyInstance(dane.get(i));
+		}
+		return predykcje;
 	}
 }

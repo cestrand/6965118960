@@ -1,4 +1,5 @@
 package projekt.essaerae;
+import weka.Matrix;
 import weka.SiecB;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -31,6 +32,14 @@ public class AnalizaGlass {
 //		LogScore ENTROPY: -1205.7866549059813
 //		LogScore AIC: -1386.7866549059809
 
+// 		61   6   3   0   0   0   0
+//		14  56   2   0   3   0   1
+//		8   2   7   0   0   0   0
+//		0   0   0   0   0   0   0
+//		0   0   0   0  13   0   0
+//		0   1   0   0   0   8   0
+//		1   0   1   0   0   0  27
+
 		wykonajSiecBK2(dane, 5);
 //		Bayes Network Classifier
 //		not using ADTree
@@ -52,15 +61,25 @@ public class AnalizaGlass {
 //		LogScore ENTROPY: -1307.0261537397337
 //		LogScore AIC: -1614.0261537397332
 
+//		61   6   3   0   0   0   0
+//		11  58   2   0   5   0   0
+//		8   2   7   0   0   0   0
+//		0   0   0   0   0   0   0
+//		0   0   0   0  13   0   0
+//		0   1   0   0   0   8   0
+//		1   0   1   0   0   1  26
 
 
 //		wykonajSiecBHC(dane, 2);
 //		wykonajSiecBHCReverse(dane, 2);
 
 		// multilayer perceptron
-		// svm
-
+		wykonajSVM(dane);
 		// cross-validacje z macierzami pomyłek
+	}
+
+	private static void wykonajSVM(Instances dane) {
+
 	}
 
 	private static void wypiszDane(Instances dane) {
@@ -84,6 +103,8 @@ public class AnalizaGlass {
 		SiecB bn = SiecB.createK2(maxNrOfParents);
 		bn.buildClassifier(dane);
 		System.out.println(bn);
+		int[][] M = Matrix.confMatrix(dane.attributeToDoubleArray(dane.classIndex()), bn.predict(dane), dane.numClasses());
+		Matrix.show(M);
 	}
 
 }
