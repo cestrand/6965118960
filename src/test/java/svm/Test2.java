@@ -2,13 +2,11 @@ package svm;
 
 import java.util.Random;
 
-import weka.classifiers.functions.SMO;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.LibSVMLoader;
 import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.Standardize;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -18,7 +16,7 @@ public class Test2 {
 //1
 		LibSVMLoader svml = new LibSVMLoader();
 		svml.setURL("file:zasoby/sonar_scale.txt");
-		SVMProblem pr = new SVMProblem("file:zasoby/sonar_scale.txt");
+		SVMProblem pr = SVMProblem.fromFile("file:zasoby/sonar_scale.txt");
 		System.out.println("Liczba klas = " + pr.classNum);
 		pr.train();
 //		= svml.getDataSet();
@@ -49,7 +47,7 @@ public class Test2 {
 		
 //3
 		System.out.println("A teraz tworzymy Problem:");
-		SVMProblem prDia = new SVMProblem(dane); 		//dane po  Standardyzacji
+		SVMProblem prDia = SVMProblem.fromInstances(dane); 		//dane po  Standardyzacji
 //		prDia.par.kernel_type = Parameter.POLY; //domy�lnie: Parameter.RBF
 //		prDia.par.degree = 3;	//domy�lnie =3
 		prDia.par.C = 22.5; //domy�lnie =1
@@ -84,7 +82,7 @@ public class Test2 {
 		}	
 		//dla danych losowych...
 		Random los = new Random();
-		double[] w = new double[prDia.M];
+		double[] w = new double[prDia.numberOfTrainingAttributes];
 		for(int i=0; i<w.length; i++)
 			w[i] = los.nextGaussian();
 //		double pred = model.predict(w); lub - po zamianie na Instance

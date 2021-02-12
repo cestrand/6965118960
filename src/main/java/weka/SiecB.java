@@ -240,14 +240,6 @@ public class SiecB extends BIFReader {
 	}
 
 
-	public int[][] confMatrix(double[] org, double[] dec, int numClasses) {
-		int[][] M = new int[numClasses][numClasses];
-		for (int i = 0; i < org.length; i++) {
-			M[(int)org[i]][(int)dec[i]]++; // macierz bledow
-		}
-		return M;
-	}
-
 	public int[][] confMatrixOfXVal(Instances dane, int q, Random los) throws Exception {
 		double[] org = dane.attributeToDoubleArray(dane.classIndex());
 		double[] dec;
@@ -258,7 +250,7 @@ public class SiecB extends BIFReader {
 		} else {
 			dec = xVal(dane, q, los); // dla q>=2: zgodna kolejnosc tablic dec i org
 		}
-		return confMatrix(org, dec, m_Instances.numClasses());
+		return Matrix.confMatrix(org, dec, m_Instances.numClasses());
 	}
 
 	/**

@@ -26,4 +26,12 @@ public class Matrix {
         System.out.println("Liczba bledow: " + bledy);
         return bledy;
     }
+
+    public static int[][] confMatrix(double[] org, double[] dec, int numClasses) {
+        int[][] M = new int[numClasses][numClasses];
+        for (int i = 0; i < org.length; i++) {
+            M[(int)org[i]][(int)dec[i]]++; // macierz bledow
+        }
+        return M;
+    }
 }

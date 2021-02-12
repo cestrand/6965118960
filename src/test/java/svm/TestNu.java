@@ -1,5 +1,6 @@
 package svm;
 
+import weka.Matrix;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
@@ -17,7 +18,7 @@ public class TestNu {
 		dane = Filter.useFilter(dane, flt);
 		
 		System.out.println("A teraz tworzymy Problem typu nu-SVC:");
-		SVMProblem prDia = new SVMProblem(dane); 		//dane po  Standardyzacji
+		SVMProblem prDia = SVMProblem.fromInstances(dane); 		//dane po  Standardyzacji
 	//	prDia.par.kernel_type = Parameter.POLY; //domy�lnie: Parameter.RBF
 		prDia.par.svm_type = SVMParameter.NU_SVC;	//domy�lnie =3
 		prDia.par.nu = 1./3;
@@ -35,6 +36,6 @@ public class TestNu {
 		prDia.par.gamma = 0.15;
 		SVMModel model = prDia.train();   //to b�dzie klasyfikator
 		model.saveTo("zasoby/diab-model-nu-RBF.mod");
-		prDia.confusionMatrix(model);
+		Matrix.show(prDia.confMatrix(model));
 	}
 }

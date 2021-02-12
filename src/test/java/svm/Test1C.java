@@ -2,6 +2,7 @@ package svm;
 
 import java.io.IOException;
 
+import weka.Matrix;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
@@ -29,7 +30,7 @@ public class Test1C {
 
 	private static void totalGroup(Instances dane, double skrajne) throws IOException {
 		System.out.println("A teraz tworzymy Problem typu 1-SVM:");
-		SVMProblem prDia1 = new SVMProblem(dane); 
+		SVMProblem prDia1 = SVMProblem.fromInstances(dane);
 		prDia1.par.svm_type = SVMParameter.ONE_CLASS;
 		prDia1.par.nu = skrajne;
 		prDia1.par.gamma = 0.15; // optymalna warto�� wyk�adnika w j�drze RBF
@@ -62,7 +63,7 @@ public class Test1C {
 		}
 		// czy elementy skrajne s� bardziej podatne na b��dy decyzji? 
 		//1. Porownanie prDia1 z prDiaNu
-		SVMProblem prDiaNu = new SVMProblem(dane); 		//dane po  Standardyzacji
+		SVMProblem prDiaNu = SVMProblem.fromInstances(dane); 		//dane po  Standardyzacji
 //		prDia.par.kernel_type = Parameter.POLY; //domy�lnie: Parameter.RBF
 		prDiaNu.par.svm_type = SVMParameter.NU_SVC;
 		prDiaNu.par.nu = 1./3; 		//mniej ni� 1/3 b��dnych decyzji, przynajmniej 1/3 SVN
@@ -70,10 +71,10 @@ public class Test1C {
 		SVMModel modelNu = prDiaNu.train();   	//to b�dzie klasyfikator
 		//lub - odczyt z pliku
 		System.out.println("...........................................");
-		modelNu = SVMModel.fromFile("zasoby/diab-model-nu-RBF.mod");
+		modelNu = SVMModel.loadFrom("zasoby/diab-model-nu-RBF.mod");
 		//System.out.println("Z pliku: "+modelNu);
-		prDiaNu.confusionMatrix(modelNu);
-		
+
+		Matrix.show(prDiaNu.confMatrix(modelNu));
 		
 		int[][]Mskr = new int[2][2];
 		int[][]Mstd = new int[2][2];
@@ -112,7 +113,7 @@ public class Test1C {
 			if (pred < 0)  // elem.skrajny
 				daneStd.delete(i);
 		}
-		SVMProblem prDiaStd = new SVMProblem(daneStd); 		//dane po  Standardyzacji
+		SVMProblem prDiaStd = SVMProblem.fromInstances(daneStd); 		//dane po  Standardyzacji
 		prDiaStd.par.svm_type = SVMParameter.NU_SVC;
 		prDiaStd.par.nu = 1./3; 		//mniej ni� 1/3 b��dnych decyzji, przynajmniej 1/3 SVN
 		prDiaStd.par.gamma = 0.15;		// czy ten parametr jest optymalny (dla zmienionego zbioru)?
@@ -121,8 +122,9 @@ public class Test1C {
 		Mskr = new int[2][2];
 		Mstd = new int[2][2];
 		System.out.println("Model dla elem. standardowych");
-		prDiaStd.confusionMatrix(modelStd);
-		prDiaNu.confusionMatrix(modelStd); // nowy model dla starych danych (dla wiekszego zbioru)
+
+		Matrix.show(prDiaStd.confMatrix(modelStd));
+		Matrix.show(prDiaNu.confMatrix(modelStd)); // nowy model dla starych danych (dla wiekszego zbioru)
 		// tzn ze zbior uczacy to Std a testowy to caly czyli razem ze skrajnymi
 		//Mamy ze niby bledow lacznie wiecej, ale dla standardowych mniej
 		

@@ -4,11 +4,10 @@ import libsvm.svm_parameter;
 
 public class SVMParameter extends svm_parameter{
 	public SVMParameter() {
-		// default values
 		svm_type = C_SVC;
 		kernel_type = RBF;
 		degree = 3;
-		gamma = 0;	// 1/num_features - DO ZMIANY!
+		gamma = 0;	// Ustawić później na 1/num_features
 		coef0 = 0;
 		nu = 0.5;
 		cache_size = 100;
@@ -20,8 +19,6 @@ public class SVMParameter extends svm_parameter{
 		nr_weight = 0;
 		weight_label = new int[0];
 		weight = new double[0];
-//		cross_validation = 0;
-		
 	}
 
 }

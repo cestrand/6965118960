@@ -62,7 +62,7 @@ public class Testy {
 		double[] org = dane.attributeToDoubleArray(dane.classIndex());
 		System.out.println("Liczba b��d�w: "+errs);
 		     			// ... i ca�o�ciowe
-		M = bn.confMatrix(org, dec, bn.m_Instances.numClasses());
+		M = Matrix.confMatrix(org, dec, bn.m_Instances.numClasses());
 		Matrix.show(M);
 		
 		//bn.condProb(W=True|O=sunny,P=yes)

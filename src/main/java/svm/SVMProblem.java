@@ -4,8 +4,8 @@ package svm;
 import java.util.TreeSet;
 
 import libsvm.svm;
-import libsvm.svm_model;
 import libsvm.svm_problem;
+import weka.Matrix;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.LibSVMLoader;
@@ -13,135 +13,108 @@ import weka.core.converters.LibSVMLoader;
 public class SVMProblem extends svm_problem{
 	SVMParameter par = new SVMParameter(); //domy�lnie - C-SVC: klasyfikacja z param. C=1	
 	SVMModel model;
-	int M;	//liczba atrybut�w (bez dec.)
+
+	/**
+	 * Liczba atrybutów w danych minus jeden, bo jeden jest decyzyjny.
+	 */
+	int numberOfTrainingAttributes;
 	int classNum;
-	
-	public SVMProblem(String nazwaPl) throws Exception {	//format danych: libSVM	
+
+	public SVMProblem() {
+
+	}
+
+	/**
+	 * Ładownaie modelu z pliku. Ostatnia kolumna ma być decyzyjna czyli ta, którą będziemy predykować.
+	 * Można też użyć metody statycznej fromInstances i samemu załadować dane ustawiając kolumnę decyzyjną.
+	 * @param nazwaPl Ścieżka do pliku z danymi o formacie ładowalnym przez Weka.
+	 * @throws Exception
+	 */
+	public static SVMProblem fromFile(String nazwaPl) throws Exception {
 		LibSVMLoader svml = new LibSVMLoader();
 		svml.setURL(nazwaPl);
 		Instances dane = svml.getDataSet();
-		//itd - dane ju� s�, co to za problem?
-		// kt�ry atrybut jest decyzyjny?  - Ostatni! - ale jako NUMERIC(!?)
-		// rozpozna� struktur�... - to jest SparseInstance
 		int iDec = dane.numAttributes()-1;
 		dane.setClassIndex(iDec);
-		y = dane.attributeToDoubleArray(iDec); //tu ju� s� decyzje
-		int m = dane.numAttributes(); 		//jeden do pomini�cia
+		return fromInstances(dane);
+	}
+
+	/**
+	 *
+	 * @return Liczba wierszy z danymi w tym problemie.
+	 */
+	public int numberOfInstances() {
+		return this.l;
+	}
+
+	/**
+	 * Ładuje dane wraz z informacjami o atrybucie klasowym z dane.
+	 * @param dane
+	 * @return
+	 */
+	public static SVMProblem fromInstances(Instances dane) {
+		int iDec = dane.classIndex();
+		if (iDec<0)
+			dane.setClassIndex(dane.numAttributes()-1);
+		SVMProblem p = new SVMProblem();
+
+		p.y = dane.attributeToDoubleArray(iDec);
+		int m = dane.numAttributes();
 		int n = dane.numInstances();
-		this.l = n;
-		this.M = m-1;   					//bez decyzyjnego
-		x = new SVMNode[l][M];
+		p.classNum = dane.numClasses();
+		p.l = n;
+		p.numberOfTrainingAttributes = m-p.classNum;
+		p.x = new SVMNode[p.l][p.numberOfTrainingAttributes];
+
 		TreeSet<Double> ts =new TreeSet();
 		for(int i=0; i<n; i++) {
 			Instance wiersz = dane.instance(i);
-			// lista - ziera� warto�ci (int)(this.y[i]) - ile jest r�nych
-			// -> classNum
-			// je�li > 16 - to znaczy, �e =1 (SVR lub 1-SVM)
-			ts.add(wiersz.classValue());
-			for(int j=0; j<iDec; j++) 		//!! Pomin�� kolumn� iDec - decyzyjn�
-				x[i][j] = new SVMNode(j+1,wiersz.value(j));
+			for(int j=0; j<iDec; j++)
+				p.x[i][j] = new SVMNode(j+1,wiersz.value(j));
+			for(int j=iDec+1; j<m; j++)
+				p.x[i][j] = new SVMNode(j,wiersz.value(j));
 		}
-		par.gamma = 1./M; //korekta warto�ci domy�lnej
-		classNum = 1;
+
+		p.par.gamma = 1./ p.numberOfTrainingAttributes;
 		if (ts.size() < 20)
-			classNum = ts.size();
-		
-	}
-	
-	// do��czy� wariant z domy�ln� standaryzacj� lub normalizacj�
-	// - raczej NIE - przepu�ci� przez filtr Standardize lub Normalize
-	// - czy (i gdzie) zapami�ta� u�yty filtr?
-	
-	public SVMProblem(Instances dane) {   	//dane - jeden z atryb. jest KLASOWY
-			//odczyta� i utworzy� y[] oraz x[][]
-		int iDec = dane.classIndex();   //chyba ostatni? a mo�e pierwszy?
-		if (iDec<0)						//jesli BRAK - wskazujemy ostatni
-			dane.setClassIndex(dane.numAttributes()-1);
-		y = dane.attributeToDoubleArray(iDec); //tu ju� s� decyzje
-		int m = dane.numAttributes(); 	//jeden do pomini�cia
-		int n = dane.numInstances();
-		this.classNum = dane.numClasses(); //wiadomo z g�ry
-		this.l = n;
-		this.M = m-1;   				//bez decyzyjnego
-		x = new SVMNode[l][M];
-		for(int i=0; i<n; i++) {
-			Instance wiersz = dane.instance(i);
-			for(int j=0; j<iDec; j++) 	//!! Pomin�� kolumn� iDec - decyzyjn�
-				x[i][j] = new SVMNode(j+1,wiersz.value(j));
-			//do pomini�cia - je�li iDec=M = m-1
-			for(int j=iDec+1; j<m; j++) //!! Pomin�� kolumn� iDec - decyzyjn� 
-				x[i][j] = new SVMNode(j,wiersz.value(j));
-		}
-		par.gamma = 1./M; //korekta warto�ci domy�lnej
+			p.classNum = ts.size();
+		return p;
 	}
 	
 	
-	public SVMParameter getPar() {
+	public SVMParameter getParameters() {
 		return par;
 	}
 
-	public int getM() {
-		return M;
+	/**
+	 *
+	 * @return Liczba atrybutów pomniejszona o liczbę atrybutów decyzyjnych.
+	 */
+	public int getNumberOfTrainingAttributes() {
+		return numberOfTrainingAttributes;
 	}
 
+	/**
+	 * Trenuje model na podstawie danych i parametrów które są w modelu.
+	 * @return SVMModel zawierający wytrenowany model.
+	 */
 	public SVMModel train() {
-		//svm_model model = svm.svm_train(this, par);
-		//this.classNum = model.nr_class;
 		model =new SVMModel(svm.svm_train(this, par));
-		return model; 	//dla SWOICH parametr�w 
+		return model;
 	}
+
+	/**
+	 * Trenuje model na podstawie danych i parametrów które są w modelu.
+	 * @param par Zestaw parametrów dla uczenia danego modelu.
+	 * @return SVMModel zawierający wytrenowany model.
+	 */
 	public SVMModel train(SVMParameter par) {
 		return new SVMModel(svm.svm_train(this, par));	//par - tym razem z zewn�trz
-	}
-
-	public static int[][] confMatrix(Instances dane, SVMProblem prDia, SVMModel model){
-		int m = dane.numClasses();
-		int[][] M = new int[m][m];
-		for(int i=0; i<prDia.l; i++) {
-			double pred = model.predict((SVMNode[]) prDia.x[i]); 
-			M[(int)prDia.y[i]][(int)pred]++;
-		}
-		return M;
-	}
-	
-	
-	public int[][] confMatrix2(Instances dane, SVMModel model){
-		int m = dane.numClasses();
-		int[][] M = new int[m][m];
-		for(int i=0; i<l; i++) {
-			double pred = model.predict((SVMNode[]) x[i]); 
-			M[(int)y[i]][(int)pred]++;
-		}
-		return M;
-	}
-	
-	static public void show(int[][] M) {
-		int m = M.length;
-		for (int i = 0; i < m; i++) { // i-ty wiersz
-			for (int j = 0; j < m; j++)
-				System.out.printf("%3d ", M[i][j]);
-			System.out.println();
-		}
-	}
-	
-	public void confusionMatrix(SVMModel model) {
-		int m = model.nr_class;
-		int[][] M = new int[m][m];
-		for(int i=0; i<this.l ; i++){
-			double pred = model.predict((SVMNode[]) this.x[i]);
-			M[(int)this.y[i]][(int)pred]++;
-		}
-		System.out.println("Macierz b��d�w: ");
-		for(int i = 0; i<m;i++) {
-			for(int j =0; j <m;j++)
-				System.out.printf("%3d ", M[i][j]);
-			System.out.println();
-		}
 	}
 	
 	public double crossValidation(SVMParameter par, int nr_fold, double[] target) {
 		if(par.gamma ==0)
-			par.gamma = 1./M;
+			par.gamma = 1./ numberOfTrainingAttributes;
 		svm.svm_cross_validation(this, par, nr_fold, target);
 		int licznikOK =0;
 		int m = this.classNum;
@@ -150,6 +123,8 @@ public class SVMProblem extends svm_problem{
 			M[(int)this.y[i]][(int)target[i]]++;
 			if(target[i]==y[i]) licznikOK++;
 		}
+
+		// TODO KURWA ALE ILE MOŻNA POWIELAĆ KOD NA MACIERZ BŁĘDÓW
 		System.out.println("Macierz b��d�w dla x-walidacji");
 		for(int i = 0; i<m;i++) {
 			for(int j =0; j <m;j++)
@@ -158,6 +133,11 @@ public class SVMProblem extends svm_problem{
 		}
 		return (double)licznikOK/l;
 	}
-	
-	
+
+
+	public int[][] confMatrix(SVMModel modelNu) {
+		SVMNode[][] nodes = (SVMNode[][])x;
+		int[][] M =Matrix.confMatrix(y, modelNu.predict(nodes), classNum);
+		return M;
+	}
 }

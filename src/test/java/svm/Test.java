@@ -7,7 +7,6 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
-import weka.core.converters.LibSVMLoader;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Standardize;
 
@@ -22,7 +21,7 @@ public class Test {
 		dane = Filter.useFilter(dane, flt);				// uwaga na FILTR		
 //3
 		System.out.println("A teraz tworzymy Problem:");
-		SVMProblem prDia = new SVMProblem(dane); 		//dane po  Standardyzacji
+		SVMProblem prDia = SVMProblem.fromInstances(dane); 		//dane po  Standardyzacji
 //		prDia.par.kernel_type = Parameter.POLY; 		//domy�lnie: Parameter.RBF
 //		prDia.par.degree = 3;							//domy�lnie =3
 		System.out.println("Pora na trening:");
@@ -64,7 +63,7 @@ public class Test {
 		}	
 		//dla danych losowych...
 		Random los = new Random();
-		double[] w = new double[prDia.getM()];
+		double[] w = new double[prDia.getNumberOfTrainingAttributes()];
 		for(int i=0; i<w.length; i++)
 			w[i] = los.nextGaussian();
 //		double pred = model.predict(w); lub - po zamianie na Instance
