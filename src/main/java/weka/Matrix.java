@@ -11,6 +11,15 @@ public class Matrix {
         }
     }
 
+    static public void show(double[][] M) {
+        int m = M.length;
+        for (int i = 0; i < m; i++) { // i-ty wiersz
+            for (int j = 0; j < m; j++)
+                System.out.printf("%3d ", (int)M[i][j]);
+            System.out.println();
+        }
+    }
+
     static public int showA(int[][] M) {
         int m = M.length;
         int bledy = 0;
