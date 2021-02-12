@@ -1,17 +1,22 @@
 package projekt.essaerae;
+import svm.SVMModel;
+import svm.SVMParameter;
+import svm.SVMProblem;
 import weka.Matrix;
 import weka.SiecB;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Standardize;
 
 public class AnalizaGlass {
 
 	public static void main(String[] args) throws Exception {
 		Instances dane = DataSource.read("zasoby/weka-data/glass.arff");
 		dane.setClassIndex(9);
-		wypiszDane(dane);
+//		wypiszDane(dane);
 
-		wykonajSiecBK2(dane, 2);
+//		wykonajSiecBK2(dane, 2);
 //		Bayes Network Classifier
 //		not using ADTree
 //		#attributes=10 #classindex=9
@@ -40,7 +45,7 @@ public class AnalizaGlass {
 //		0   1   0   0   0   8   0
 //		1   0   1   0   0   0  27
 
-		wykonajSiecBK2(dane, 5);
+//		wykonajSiecBK2(dane, 5);
 //		Bayes Network Classifier
 //		not using ADTree
 //      #attributes=10 #classindex=9
@@ -78,8 +83,17 @@ public class AnalizaGlass {
 		// cross-validacje z macierzami pomyłek
 	}
 
-	private static void wykonajSVM(Instances dane) {
+	private static void wykonajSVM(Instances dane) throws Exception {
+		Standardize flt = new Standardize();
+		flt.setInputFormat(dane);
+		Instances danestd = Filter.useFilter(dane, flt);
 
+		SVMProblem problem = SVMProblem.fromInstances(dane);
+		problem.par.svm_type = SVMParameter.C_SVC;
+		problem.par.nu = 0.2;
+		problem.par.gamma = 0.15;
+		SVMModel model = problem.train();
+		Matrix.show(problem.confMatrix(model));
 	}
 
 	private static void wypiszDane(Instances dane) {
