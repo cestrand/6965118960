@@ -103,8 +103,7 @@ public class AnalizaGlass {
 		SiecB bn = SiecB.createK2(maxNrOfParents);
 		bn.buildClassifier(dane);
 		System.out.println(bn);
-		int[][] M = Matrix.confMatrix(dane.attributeToDoubleArray(dane.classIndex()), bn.predict(dane), dane.numClasses());
-		Matrix.show(M);
+		Matrix.show(bn.confMatrix(dane));
 	}
 
 }

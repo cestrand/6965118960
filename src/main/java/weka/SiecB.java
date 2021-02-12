@@ -295,4 +295,9 @@ public class SiecB extends BIFReader {
 		}
 		return predykcje;
 	}
+
+	public int[][] confMatrix(Instances dane) throws Exception {
+		int[][] M = Matrix.confMatrix(dane.attributeToDoubleArray(dane.classIndex()), predict(dane), dane.numClasses());
+		return M;
+	}
 }
