@@ -11,7 +11,7 @@ import weka.core.Instances;
 import weka.core.converters.LibSVMLoader;
 
 public class SVMProblem extends svm_problem{
-	SVMParameter par = new SVMParameter(); //domy�lnie - C-SVC: klasyfikacja z param. C=1	
+	public SVMParameter par = new SVMParameter(); //domy�lnie - C-SVC: klasyfikacja z param. C=1
 	SVMModel model;
 
 	/**
@@ -63,12 +63,13 @@ public class SVMProblem extends svm_problem{
 		int n = dane.numInstances();
 		p.classNum = dane.numClasses();
 		p.l = n;
-		p.numberOfTrainingAttributes = m-p.classNum;
+		p.numberOfTrainingAttributes = m-1;
 		p.x = new SVMNode[p.l][p.numberOfTrainingAttributes];
 
 		TreeSet<Double> ts =new TreeSet();
 		for(int i=0; i<n; i++) {
 			Instance wiersz = dane.instance(i);
+			ts.add(wiersz.classValue());
 			for(int j=0; j<iDec; j++)
 				p.x[i][j] = new SVMNode(j+1,wiersz.value(j));
 			for(int j=iDec+1; j<m; j++)
@@ -137,7 +138,11 @@ public class SVMProblem extends svm_problem{
 
 	public int[][] confMatrix(SVMModel modelNu) {
 		SVMNode[][] nodes = (SVMNode[][])x;
-		int[][] M =Matrix.confMatrix(y, modelNu.predict(nodes), classNum);
+		double[] predykcje = modelNu.predict(nodes);
+		for (int i=0; i<predykcje.length; i++) {
+			predykcje[i] = predykcje[i] > 0 ? predykcje[i] : 0;
+		}
+		int[][] M =Matrix.confMatrix(y, predykcje, this.classNum);
 		return M;
 	}
 }
