@@ -2,6 +2,7 @@ package weka;
 
 import weka.core.Attribute;
 import weka.core.Instances;
+import weka.core.Range;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
 
@@ -97,6 +98,35 @@ public class Data {
         Instances polaczoneDane = new Instances(rDane, rDane.numInstances()+lDane.numInstances());
         polaczoneDane.addAll(lDane);
         return polaczoneDane;
+    }
+
+    /**
+     * Zwraca instancje wybrane przez dany range.
+     * @param instances Dane z których wybieramy
+     * @param range Zakres kolumn który ma zostać wybrany.
+     * @return Zwraca zbiór danych zawierający tylko wybrane kolumny.
+     */
+    public static Instances getAttributesByRange(Instances instances, Range range) {
+        range.setUpper(instances.numAttributes());
+        Instances ret = new Instances(instances);
+        int numberOfDeleted = 0;
+        for(int i=0; i<instances.numAttributes(); i++) {
+            if(range.isInRange(i) == false) {
+                ret.deleteAttributeAt(i-numberOfDeleted);
+                numberOfDeleted++;
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Zwraca instancje wybrane przez dany range.
+     * @param instances Dane z których wybieramy
+     * @param range Zakres kolumn który ma zostać wybrany. String w formacie dla typu Range.
+     * @return Zwraca zbiór danych zawierający tylko wybrane kolumny.
+     */
+    public static Instances getAttributesByRange(Instances instances, String range) {
+        return getAttributesByRange(instances, new Range(range));
     }
 
 }
