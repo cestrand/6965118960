@@ -6,6 +6,14 @@ Poszczególne testy można łatwo uruchamiać niezależnie w IDE (ja używam Int
 package projekt.janepe;
 
 import org.junit.jupiter.api.Test;
+import svm.SVMModel;
+import svm.SVMNode;
+import svm.SVMParameter;
+import svm.SVMProblem;
+import weka.Data;
+import weka.Matrix;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.RBFKernel;
@@ -13,13 +21,15 @@ import weka.core.Instances;
 import weka.core.SelectedTag;
 import weka.core.converters.ConverterUtils;
 import weka.core.converters.LibSVMLoader;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Standardize;
 
 import java.util.Random;
 
 public class SVM {
 
     @Test
-    public void SVMTest1() throws Exception {
+    public void SVM1() throws Exception {
         Instances dane = ConverterUtils.DataSource.read("zasoby/ph-data.arff");
         dane.setClass(dane.attribute("label"));
 
@@ -40,7 +50,7 @@ public class SVM {
     }
 
     @Test
-    public void SVMRBFTest() throws Exception {
+    public void SVMRBF1() throws Exception {
         Instances dane = ConverterUtils.DataSource.read("zasoby/ph-data.arff");
         dane.setClass(dane.attribute("label"));
 
@@ -53,7 +63,7 @@ public class SVM {
     }
 
     @Test
-    public void SVMRBFTest2() throws Exception {
+    public void SVMRBF2() throws Exception {
         Instances dane = ConverterUtils.DataSource.read("zasoby/ph-data.arff");
         dane.setClass(dane.attribute("label"));
 
@@ -71,6 +81,87 @@ public class SVM {
         ev.crossValidateModel(smo, dane, 4, new Random(69), xValOut);
         System.out.println(xValOut);
         SieciBayes.printEvaluateModel(ev);
+    }
+
+    @Test
+    public void SVMLabT1() throws Exception {
+        Instances dane = ConverterUtils.DataSource.read("zasoby/ph-data.arff");
+        dane.setClass(dane.attribute("label"));
+
+        dane = Data.discretizeAttributesSupervised(dane, "1-3");
+
+        Standardize flt = new Standardize();
+        flt.setInputFormat(dane);
+        dane = Filter.useFilter(dane, flt);
+
+        SVMProblem problem = SVMProblem.fromInstances(dane);
+        problem.par.svm_type = SVMParameter.C_SVC;
+        problem.par.kernel_type = SVMParameter.RBF;
+        problem.par.C = 100000;
+        problem.par.gamma = 0.5;
+        SVMModel model= problem.train();
+
+
+        int poprawne = 0;
+        int bledne = 0;
+        int m = dane.numClasses();
+        int[][] M = new int[m][m];
+        for(int i=0; i<problem.l; i++) {
+            double pred = model.predict((SVMNode[]) problem.x[i]);
+            int i1 = (int) problem.y[i];
+            int i2 = (int) pred;
+            M[i1][i2]++; //macierz błędów
+            if(i1 == i2) {
+                poprawne++;
+            }
+            else {
+                bledne++;
+            }
+        }
+        Matrix.show(M);
+        System.out.printf("Poprawne:\t%d --- %.2f%%\n", (int) poprawne, (double)poprawne / dane.numInstances() * 100);
+        System.out.printf("Błędne:  \t%d --- %.2f%%\n", (int) bledne, (double)bledne / dane.numInstances() * 100);
+
+
+        // Dokładność rzędu 86% na całym zbiorze nie zachwyca ale zrobimy jeszcze kroswalidacje, żeby pokazać,
+        // że umiemy robić takie fikołki.
+
+        // == 4 krotna kroswalidacja ==
+        int numFolds = 4;
+        Random random = new Random(83838383);
+        poprawne = 0;
+        bledne = 0;
+        m = dane.numClasses();
+        M = new int[m][m];
+
+        double predictions[] = new double[dane.numInstances()];
+        // Do the folds
+        for (int i = 0; i < numFolds; i++) {
+            Instances train = dane.trainCV(numFolds, i, random);
+//            setPriors(train);
+            SVMProblem pr = SVMProblem.fromInstances(train);
+            pr.par = problem.par;
+            SVMModel mo = pr.train();
+            Instances test = dane.testCV(numFolds, i);
+            SVMProblem prtest = SVMProblem.fromInstances(test);
+            for(int j=0; j<prtest.l; j++) {
+                double pred = mo.predict((SVMNode[]) prtest.x[j]);
+                int i1 = (int) prtest.y[j];
+                int i2 = (int) pred;
+                M[i1][i2]++; //macierz błędów
+                if(i1 == i2) {
+                    poprawne++;
+                }
+                else {
+                    bledne++;
+                }
+            }
+        }
+        Matrix.show(M);
+        System.out.printf("Poprawne:\t%d --- %.2f%%\n", (int) poprawne, (double)poprawne / dane.numInstances() * 100);
+        System.out.printf("Błędne:  \t%d --- %.2f%%\n", (int) bledne, (double)bledne / dane.numInstances() * 100);
+
+        // no i otrzymaliśmy accuracy = 71,21% przy 4 krotnej kroswalidacji
     }
 
 }
