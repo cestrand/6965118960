@@ -140,7 +140,7 @@ public class AnalizaGlass {
 		double[] celX = new double[dane.numInstances()];
 		SVMParameter par = problem.par;
 
-		double[] g = {0.11};//0.1, 0.11, 0.12, 0.15, 0.18, 1./(danestd.numAttributes()-1)};
+		double[] g = {0.11};//0.1, 0.11, 0.12, 0.15, 0.18};
 		for (double gamma:g) {
 			par.gamma = gamma;
 			double dokladnosc = problem.crossValidation(problem.par, 10, celX);
