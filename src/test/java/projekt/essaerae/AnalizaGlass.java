@@ -106,7 +106,7 @@ public class AnalizaGlass {
 	}
 
 
-	public static void wykonajSVM(Instances dane) throws Exception {
+	private static void wykonajSVM(Instances dane) throws Exception {
 		Standardize flt = new Standardize();
 		flt.setInputFormat(dane);
 		Instances danestd = Filter.useFilter(dane, flt);
@@ -127,7 +127,7 @@ public class AnalizaGlass {
 		System.out.println(dane);
 	}
 
-	private static void pokazDokladnosc(Instances dane, int[][] M){
+	public static void pokazDokladnosc(Instances dane, int[][] M){
 		int N = M.length;
 		int poprawne = 0;
 		double wszystkie = dane.numInstances();
