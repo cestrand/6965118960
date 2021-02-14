@@ -99,26 +99,10 @@ public class SVM {
         problem.par.gamma = 0.5;
         SVMModel model= problem.train();
 
-
-        int poprawne = 0;
-        int bledne = 0;
-        int m = dane.numClasses();
-        int[][] M = new int[m][m];
-        for(int i=0; i<problem.l; i++) {
-            double pred = model.predict((SVMNode[]) problem.x[i]);
-            int i1 = (int) problem.y[i];
-            int i2 = (int) pred;
-            M[i1][i2]++; //macierz błędów
-            if(i1 == i2) {
-                poprawne++;
-            }
-            else {
-                bledne++;
-            }
-        }
+        int[][] M = problem.confMatrix(model);
         Matrix.show(M);
-        System.out.printf("Poprawne:\t%d --- %.2f%%\n", (int) poprawne, (double)poprawne / dane.numInstances() * 100);
-        System.out.printf("Błędne:  \t%d --- %.2f%%\n", (int) bledne, (double)bledne / dane.numInstances() * 100);
+        // policzymy sobie dokładność z użyciem kodu pani Aleksandry.
+        projekt.essaerae.AnalizaGlass.pokazDokladnosc(dane, M);
 
 
         // Zrobimy jeszcze kroswalidacje, żeby pokazać, że umiemy robić takie fikołki.
@@ -126,9 +110,9 @@ public class SVM {
         // == 4 krotna kroswalidacja ==
         int numFolds = 4;
         Random random = new Random(83838383);
-        poprawne = 0;
-        bledne = 0;
-        m = dane.numClasses();
+        int poprawne = 0;
+        int bledne = 0;
+        int m = dane.numClasses();
         M = new int[m][m];
 
         double predictions[] = new double[dane.numInstances()];
