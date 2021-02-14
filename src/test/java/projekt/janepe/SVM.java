@@ -88,8 +88,6 @@ public class SVM {
         Instances dane = ConverterUtils.DataSource.read("zasoby/ph-data.arff");
         dane.setClass(dane.attribute("label"));
 
-        dane = Data.discretizeAttributesSupervised(dane, "1-3");
-
         Standardize flt = new Standardize();
         flt.setInputFormat(dane);
         dane = Filter.useFilter(dane, flt);
@@ -123,8 +121,7 @@ public class SVM {
         System.out.printf("Błędne:  \t%d --- %.2f%%\n", (int) bledne, (double)bledne / dane.numInstances() * 100);
 
 
-        // Dokładność rzędu 86% na całym zbiorze nie zachwyca ale zrobimy jeszcze kroswalidacje, żeby pokazać,
-        // że umiemy robić takie fikołki.
+        // Zrobimy jeszcze kroswalidacje, żeby pokazać, że umiemy robić takie fikołki.
 
         // == 4 krotna kroswalidacja ==
         int numFolds = 4;
