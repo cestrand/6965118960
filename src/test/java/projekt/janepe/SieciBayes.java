@@ -11,13 +11,14 @@ import weka.core.converters.ConverterUtils;
 import java.util.Random;
 
 public class SieciBayes {
-    public void evaluateModel(Instances dane, Classifier bn) throws Exception {
+    public static void evaluateModel(Instances dane, Classifier bn) throws Exception {
         Evaluation ev = new Evaluation(dane);
         ev.evaluateModel(bn, dane);
         printEvaluateModel(ev);
     }
 
-    public void printEvaluateModel(Evaluation ev) {
+    public static void printEvaluateModel(Evaluation ev) {
+        Matrix.show(ev.confusionMatrix());
         System.out.printf("Poprawne:\t%d --- %.2f%%\n", (int) ev.correct(), ev.correct() / ev.numInstances() * 100);
         System.out.printf("Błędne:  \t%d --- %.2f%%\n", (int) ev.incorrect(), ev.incorrect() / ev.numInstances() * 100);
     }
@@ -28,7 +29,6 @@ public class SieciBayes {
         dane.setClass(dane.attribute("label"));
         SiecB bn = SiecB.createK2(3);
         bn.buildClassifier(dane);
-        Matrix.show(bn.confMatrix(dane));
 
         evaluateModel(dane, bn);
     }
@@ -39,7 +39,6 @@ public class SieciBayes {
         dane.setClass(dane.attribute("label"));
         SiecB bn = SiecB.createHillClimbGlobal(3);
         bn.buildClassifier(dane);
-        Matrix.show(bn.confMatrix(dane));
 
         evaluateModel(dane, bn);
 
@@ -72,7 +71,6 @@ public class SieciBayes {
         dane.setClass(dane.attribute("label"));
         SiecB bn = SiecB.createHillClimbLocal(3);
         bn.buildClassifier(dane);
-        Matrix.show(bn.confMatrix(dane));
 
         evaluateModel(dane, bn);
     }
