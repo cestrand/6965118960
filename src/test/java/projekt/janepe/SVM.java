@@ -12,18 +12,16 @@ import svm.SVMParameter;
 import svm.SVMProblem;
 import weka.Data;
 import weka.Matrix;
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.RBFKernel;
 import weka.core.Instances;
 import weka.core.SelectedTag;
 import weka.core.converters.ConverterUtils;
-import weka.core.converters.LibSVMLoader;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Standardize;
 
+import java.io.*;
 import java.util.Random;
 
 public class SVM {
@@ -78,9 +76,45 @@ public class SVM {
 
         Evaluation ev = new Evaluation(dane);
         StringBuffer xValOut = new StringBuffer();
-        ev.crossValidateModel(smo, dane, 4, new Random(69), xValOut);
+        ev.crossValidateModel(smo, dane, 10, new Random(69), xValOut);
         System.out.println(xValOut);
         SieciBayes.printEvaluateModel(ev);
+
+        // zapiszmy ten klasyfikator w postaci zserializowanej jako obiekt Java do pliku
+        try {
+            FileOutputStream fileOut =
+                    new FileOutputStream("C:/svm_rbf2.ser");
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(smo);
+            out.close();
+            fileOut.close();
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
+    }
+
+    @Test
+    public void SVMRBFDeserialize() throws Exception {
+        Instances dane = ConverterUtils.DataSource.read("zasoby/ph-data.arff");
+        dane.setClass(dane.attribute("label"));
+
+        SMO smo;
+        try {
+            FileInputStream fileIn = new FileInputStream("C:/svm_rbf2.ser");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            smo = (SMO) in.readObject();
+            in.close();
+            fileIn.close();
+        } catch (IOException i) {
+            i.printStackTrace();
+            return;
+        } catch (ClassNotFoundException c) {
+            System.out.println("SMO class not found");
+            c.printStackTrace();
+            return;
+        }
+
+        SieciBayes.evaluateModel(dane, smo);
     }
 
     @Test
@@ -106,9 +140,8 @@ public class SVM {
 
 
         // Zrobimy jeszcze kroswalidacje, żeby pokazać, że umiemy robić takie fikołki.
-
-        // == 4 krotna kroswalidacja ==
-        int numFolds = 4;
+        // == 10 krotna kroswalidacja ==
+        int numFolds = 10;
         Random random = new Random(83838383);
         int poprawne = 0;
         int bledne = 0;
@@ -147,6 +180,8 @@ public class SVM {
         double[] celX = new double[dane.numInstances()];
         double dokladnosc = problem.crossValidation(problem.par, 4, celX);
         System.out.printf("Dokładność:\t%.2f\n", dokladnosc);
-    }
 
+
+        model.saveTo("C:/svm_labt1.mod");
+    }
 }
