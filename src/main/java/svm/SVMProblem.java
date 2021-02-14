@@ -125,7 +125,7 @@ public class SVMProblem extends svm_problem{
 			if(target[i]==y[i]) licznikOK++;
 		}
 
-		System.out.println("Macierz b��d�w dla x-walidacji");
+		System.out.println("Macierz błędów dla x-walidacji");
 		for(int i = 0; i<m;i++) {
 			for(int j =0; j <m;j++)
 				System.out.printf("%3d ", M[i][j]);
