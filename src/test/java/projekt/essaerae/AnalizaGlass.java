@@ -10,8 +10,6 @@ import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Standardize;
 
-import java.util.Random;
-
 public class AnalizaGlass {
 
 	public static void main(String[] args) throws Exception {
@@ -57,7 +55,7 @@ public class AnalizaGlass {
 		bn.buildClassifier(dane);
 		System.out.println(bn);
 		Matrix.show(bn.confMatrix(dane));
-		pokazParametryModelu(dane, bn);
+		pokazDokladnosc(dane, bn);
 	}
 
 	private static void wykonajSiecBHCL(Instances dane, int maxNrOfParents) throws Exception {
@@ -65,7 +63,7 @@ public class AnalizaGlass {
 		bn.buildClassifier(dane);
 		System.out.println(bn);
 		Matrix.show(bn.confMatrix(dane));
-		pokazParametryModelu(dane, bn);
+		pokazDokladnosc(dane, bn);
 	}
 
 	private static void wykonajSiecBK2(Instances dane, int maxNrOfParents) throws Exception {
@@ -74,10 +72,10 @@ public class AnalizaGlass {
 		bn.buildClassifier(dane);
 		System.out.println(bn);
 		Matrix.show(bn.confMatrix(dane));
-		pokazParametryModelu(dane, bn);
+		pokazDokladnosc(dane, bn);
 	}
 
-	private static void pokazParametryModelu(Instances dane, SiecB bn) throws Exception {
+	private static void pokazDokladnosc(Instances dane, SiecB bn) throws Exception {
 		Evaluation ev = new Evaluation(dane);
 		ev.evaluateModel(bn, dane);
 		System.out.printf("Poprawne:\t%d --- %.2f%%\n", (int) ev.correct(), ev.correct() / ev.numInstances() * 100);
