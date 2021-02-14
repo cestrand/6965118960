@@ -4,7 +4,6 @@ import svm.SVMParameter;
 import svm.SVMProblem;
 import weka.Matrix;
 import weka.SiecB;
-import weka.classifiers.Evaluation;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
@@ -29,7 +28,9 @@ public class AnalizaGlass {
 
 //		wykonajSiecBHCLP5(dane);
 
-		wykonajSVM(dane);
+//		wykonajSVMC(dane);
+
+//		wykonajSVMNu(dane);
 
 
 	}
@@ -106,18 +107,49 @@ public class AnalizaGlass {
 	}
 
 
-	private static void wykonajSVM(Instances dane) throws Exception {
+	private static void wykonajSVMC(Instances dane) throws Exception {
 		Standardize flt = new Standardize();
 		flt.setInputFormat(dane);
 		Instances danestd = Filter.useFilter(dane, flt);
 
-		SVMProblem problem = SVMProblem.fromInstances(dane);
+		SVMProblem problem = SVMProblem.fromInstances(danestd);
 		problem.par.svm_type = SVMParameter.C_SVC;
 		problem.par.kernel_type = SVMParameter.RBF;
 		problem.par.C = 10;
-		problem.par.gamma = 0.5;
+		problem.par.gamma = 1./(danestd.numAttributes()-1);
 		SVMModel model= problem.train();
 
+		int[][] M = problem.confMatrix(model);
+		Matrix.show(M);
+		pokazDokladnosc(danestd, M);
+
+		System.out.println("Walidacja krzyżowa:");
+		double[] celX = new double[danestd.numInstances()];
+		double dokladnosc = problem.crossValidation(problem.par, 10, celX);
+		System.out.printf("Dokładność:\t%.2f\n", dokladnosc*100);
+	}
+
+	private static void wykonajSVMNu(Instances dane) throws Exception {
+		Standardize flt = new Standardize();
+		flt.setInputFormat(dane);
+		Instances danestd = Filter.useFilter(dane, flt);
+
+		SVMProblem problem = SVMProblem.fromInstances(danestd);
+		problem.par.svm_type = SVMParameter.NU_SVC;
+		problem.par.nu = 0.25;
+		double[] celX = new double[dane.numInstances()];
+		SVMParameter par = problem.par;
+
+		double[] g = {0.11};//0.1, 0.11, 0.12, 0.15, 0.18, 1./(danestd.numAttributes()-1)};
+		for (double gamma:g) {
+			par.gamma = gamma;
+			double dokladnosc = problem.crossValidation(problem.par, 10, celX);
+			System.out.printf("Dokładność:\t%.2f\n", dokladnosc*100);
+			System.out.println("Dla gamma = "+gamma);
+		}
+
+		problem.par.gamma = 0.11;
+		SVMModel model = problem.train();
 		int[][] M = problem.confMatrix(model);
 		Matrix.show(M);
 		pokazDokladnosc(dane, M);
