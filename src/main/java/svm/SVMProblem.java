@@ -125,7 +125,6 @@ public class SVMProblem extends svm_problem{
 			if(target[i]==y[i]) licznikOK++;
 		}
 
-		// TODO KURWA ALE ILE MOŻNA POWIELAĆ KOD NA MACIERZ BŁĘDÓW
 		System.out.println("Macierz b��d�w dla x-walidacji");
 		for(int i = 0; i<m;i++) {
 			for(int j =0; j <m;j++)
