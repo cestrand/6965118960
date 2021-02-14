@@ -141,8 +141,12 @@ public class SVM {
         Matrix.show(M);
         System.out.printf("Poprawne:\t%d --- %.2f%%\n", (int) poprawne, (double)poprawne / dane.numInstances() * 100);
         System.out.printf("Błędne:  \t%d --- %.2f%%\n", (int) bledne, (double)bledne / dane.numInstances() * 100);
-
         // no i otrzymaliśmy accuracy = 71,21% przy 4 krotnej kroswalidacji
+
+        // albo jeszcze inaczej kroswalidacja z użyciem kodu napisanego na laboratorium
+        double[] celX = new double[dane.numInstances()];
+        double dokladnosc = problem.crossValidation(problem.par, 4, celX);
+        System.out.printf("Dokładność:\t%.2f\n", dokladnosc);
     }
 
 }
