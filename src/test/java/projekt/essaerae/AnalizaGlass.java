@@ -28,7 +28,7 @@ public class AnalizaGlass {
 
 //		wykonajSiecBHCLP5(dane);
 
-//		wykonajSVMC(dane);
+		wykonajSVMC(dane);
 
 //		wykonajSVMNu(dane);
 
@@ -115,7 +115,7 @@ public class AnalizaGlass {
 		SVMProblem problem = SVMProblem.fromInstances(danestd);
 		problem.par.svm_type = SVMParameter.C_SVC;
 		problem.par.kernel_type = SVMParameter.RBF;
-		problem.par.C = 10;
+		problem.par.C = 16; //sprawdzone: 10, 15, 16, 18, 20
 		problem.par.gamma = 1./(danestd.numAttributes()-1);
 		SVMModel model= problem.train();
 
