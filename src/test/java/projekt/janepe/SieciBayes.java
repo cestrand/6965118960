@@ -1,3 +1,8 @@
+/*
+W tym pliku znajdują się testy z użyciem JUnit 5.
+Poszczególne testy można łatwo uruchamiać niezależnie w IDE (ja używam IntelliJ IDEA).
+*/
+
 package projekt.janepe;
 
 import org.junit.jupiter.api.Test;
