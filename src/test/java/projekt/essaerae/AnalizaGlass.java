@@ -106,7 +106,7 @@ public class AnalizaGlass {
 	}
 
 
-	private static void wykonajSVM(Instances dane) throws Exception {
+	public static void wykonajSVM(Instances dane) throws Exception {
 		Standardize flt = new Standardize();
 		flt.setInputFormat(dane);
 		Instances danestd = Filter.useFilter(dane, flt);
