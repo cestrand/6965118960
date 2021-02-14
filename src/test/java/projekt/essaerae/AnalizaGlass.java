@@ -10,26 +10,99 @@ import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Standardize;
 
+import java.util.Random;
+
 public class AnalizaGlass {
 
 	public static void main(String[] args) throws Exception {
 		Instances dane = DataSource.read("zasoby/weka-data/glass.arff");
-		dane.setClassIndex(9);
+		dane.setClass(dane.attribute("Type"));
 //		wypiszDane(dane);
 
-		wykonajSiecBK2(dane, 2);
+//		wykonajSiecBK2P2(dane);
 
-//		wykonajSiecBHCG(dane, 2);
+//		wykonajSiceBHCGP2(dane);
 
-		wykonajSiecBHCG(dane, 5);
+//		wykonajSiecBHCLP2(dane);
 
-//		wykonajSiecBHCL(dane, 2);
+//		wykonajSiecBHCGP5(dane);
 
-		wykonajSiecBHCL(dane, 5);
+//		wykonajSiecBHCLP5(dane);
 
-//		wykonajSVM(dane);
+		wykonajSVM(dane);
 
 
+	}
+
+	private static void wykonajSiecBHCLP5(Instances dane) throws Exception {
+		int maxNrOfParents = 5;
+		SiecB bn = SiecB.createHillClimbLocal(maxNrOfParents);
+		bn.buildClassifier(dane);
+		System.out.println("Sieć Bayesowska Hill Climbing (local) max rodziców 5:");
+		System.out.println(bn);
+
+		int[][] confM = bn.confMatrix(dane);
+		Matrix.show(confM);
+		pokazDokladnosc(dane, confM);
+
+		System.out.println("Walidacja krzyżowa:");
+		int[][] confMVal = bn.confMatrixOfXVal(dane, 10, new Random(3));
+		Matrix.show(confMVal);
+		pokazDokladnosc(dane, confMVal);
+	}
+
+	private static void wykonajSiecBHCLP2(Instances dane) throws Exception {
+		int maxNrOfParents = 2;
+		SiecB bn = SiecB.createHillClimbLocal(maxNrOfParents);
+		bn.buildClassifier(dane);
+		System.out.println("Sieć Bayesowska Hill Climbing (local) max rodziców 2:");
+		System.out.println(bn);
+
+		int[][] confM = bn.confMatrix(dane);
+		Matrix.show(confM);
+		pokazDokladnosc(dane, confM);
+	}
+
+	private static void wykonajSiceBHCGP2(Instances dane) throws Exception {
+		int maxNrOfParents = 2;
+		SiecB bn = SiecB.createHillClimbGlobal(maxNrOfParents);
+		System.out.println("Sieć Bayesowska Hill Climbing (global) max rodziców 2:");
+		bn.buildClassifier(dane);
+		System.out.println(bn);
+
+		int[][] confM = bn.confMatrix(dane);
+		Matrix.show(confM);
+		pokazDokladnosc(dane, confM);
+	}
+
+	private static void wykonajSiecBHCGP5(Instances dane) throws Exception {
+		int maxNrOfParents = 5;
+		SiecB bn = SiecB.createHillClimbGlobal(maxNrOfParents);
+		bn.buildClassifier(dane);
+		System.out.println("Sieć Bayesowska Hill Climbing (global) max rodziców 5:");
+		System.out.println(bn);
+
+		int[][] confM = bn.confMatrix(dane);
+		Matrix.show(confM);
+		pokazDokladnosc(dane, confM);
+
+		System.out.println("Walidacja krzyżowa:");
+		int[][] confMVal = bn.confMatrixOfXVal(dane, 10, new Random(3));
+		Matrix.show(confMVal);
+		pokazDokladnosc(dane, confMVal);
+	}
+
+	private static void wykonajSiecBK2P2(Instances dane) throws Exception {
+		int maxNrOfParents=2;
+		// sieć bayesowska k2
+		SiecB bn = SiecB.createK2(maxNrOfParents);
+		bn.buildClassifier(dane);
+		System.out.println("Sieć Bayesowska K2 max rodziców 2:");
+		System.out.println(bn);
+
+		int[][] confM = bn.confMatrix(dane);
+		Matrix.show(confM);
+		pokazDokladnosc(dane, confM);
 	}
 
 
@@ -40,46 +113,32 @@ public class AnalizaGlass {
 
 		SVMProblem problem = SVMProblem.fromInstances(dane);
 		problem.par.svm_type = SVMParameter.C_SVC;
-		problem.par.nu = 0.2;
-		problem.par.gamma = 0.15;
-		SVMModel model = problem.train();
-		Matrix.show(problem.confMatrix(model));
+		problem.par.kernel_type = SVMParameter.RBF;
+		problem.par.C = 10;
+		problem.par.gamma = 0.5;
+		SVMModel model= problem.train();
+
+		int[][] M = problem.confMatrix(model);
+		Matrix.show(M);
+		pokazDokladnosc(dane, M);
 	}
 
 	private static void wypiszDane(Instances dane) {
 		System.out.println(dane);
 	}
 
-	private static void wykonajSiecBHCG(Instances dane, int maxNrOfParents) throws Exception {
-		SiecB bn = SiecB.createHillClimbGlobal(maxNrOfParents);
-		bn.buildClassifier(dane);
-		System.out.println(bn);
-		Matrix.show(bn.confMatrix(dane));
-		pokazDokladnosc(dane, bn);
+	private static void pokazDokladnosc(Instances dane, int[][] M){
+		int N = M.length;
+		int poprawne = 0;
+		double wszystkie = dane.numInstances();
+		for (int i = 0; i < N; i++) {
+			poprawne += M[i][i];
+		}
+		int bledne = (int)wszystkie - poprawne;
+		System.out.printf("Poprawne:\t%d --- %.2f%%\n", poprawne, poprawne / wszystkie * 100);
+		System.out.printf("Błędne:  \t%d --- %.2f%%\n", bledne, bledne / wszystkie * 100);
 	}
 
-	private static void wykonajSiecBHCL(Instances dane, int maxNrOfParents) throws Exception {
-		SiecB bn = SiecB.createHillClimbLocal(maxNrOfParents);
-		bn.buildClassifier(dane);
-		System.out.println(bn);
-		Matrix.show(bn.confMatrix(dane));
-		pokazDokladnosc(dane, bn);
-	}
 
-	private static void wykonajSiecBK2(Instances dane, int maxNrOfParents) throws Exception {
-		// sieć bayesowska k2
-		SiecB bn = SiecB.createK2(maxNrOfParents);
-		bn.buildClassifier(dane);
-		System.out.println(bn);
-		Matrix.show(bn.confMatrix(dane));
-		pokazDokladnosc(dane, bn);
-	}
-
-	private static void pokazDokladnosc(Instances dane, SiecB bn) throws Exception {
-		Evaluation ev = new Evaluation(dane);
-		ev.evaluateModel(bn, dane);
-		System.out.printf("Poprawne:\t%d --- %.2f%%\n", (int) ev.correct(), ev.correct() / ev.numInstances() * 100);
-		System.out.printf("Błędne:  \t%d --- %.2f%%\n", (int) ev.incorrect(), ev.incorrect() / ev.numInstances() * 100);
-	}
 
 }
