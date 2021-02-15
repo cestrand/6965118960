@@ -16,23 +16,24 @@ public class AnalizaGlass {
 	public static void main(String[] args) throws Exception {
 		Instances dane = DataSource.read("zasoby/weka-data/glass.arff");
 		dane.setClass(dane.attribute("Type"));
-//		wypiszDane(dane);
 
-//		wykonajSiecBK2P2(dane);
+		wypiszDane(dane);
 
-//		wykonajSiecBK2P5(dane);
+		wykonajSiecBK2P2(dane);
 
-//		wykonajSiceBHCGP2(dane);
+		wykonajSiecBK2P5(dane);
 
-//		wykonajSiecBHCGP5(dane);
+		wykonajSiceBHCGP2(dane);
 
-//		wykonajSiecBHCLP2(dane);
+		wykonajSiecBHCGP5(dane);
 
-//		wykonajSiecBHCLP5(dane);
+		wykonajSiecBHCLP2(dane);
 
-//		wykonajSVMC(dane);
+		wykonajSiecBHCLP5(dane);
 
-//		wykonajSVMNu(dane);
+		wykonajSVMC(dane);
+
+		wykonajSVMNu(dane);
 
 
 	}
