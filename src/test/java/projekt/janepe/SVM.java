@@ -14,6 +14,7 @@ import weka.Data;
 import weka.Matrix;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SMO;
+import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.RBFKernel;
 import weka.core.Instances;
 import weka.core.SelectedTag;
@@ -43,6 +44,21 @@ public class SVM {
 
         // Lepszy wynik otrzymujemy przy tym problemie używając standaryzacji niż normalizacji.
         smo.setFilterType(new SelectedTag(smo.FILTER_STANDARDIZE, smo.TAGS_FILTER));
+        smo.setC(10000);
+        smo.buildClassifier(dane);
+        SieciBayes.evaluateModel(dane, smo);
+    }
+
+    @Test
+    public void SVM2() throws Exception {
+        Instances dane = ConverterUtils.DataSource.read("zasoby/ph-data.arff");
+        dane.setClass(dane.attribute("label"));
+
+        SMO smo = new SMO();
+        smo.setFilterType(new SelectedTag(smo.FILTER_STANDARDIZE, smo.TAGS_FILTER));
+        PolyKernel kernel = (PolyKernel)smo.getKernel();
+        kernel.setExponent(2);
+        smo.setC(10000);
         smo.buildClassifier(dane);
         SieciBayes.evaluateModel(dane, smo);
     }
@@ -72,6 +88,7 @@ public class SVM {
         smo.setKernel(kernel);
         smo.setC(100000);
         smo.buildClassifier(dane);
+        System.out.println(smo);
         SieciBayes.evaluateModel(dane, smo);
 
         Evaluation ev = new Evaluation(dane);
@@ -132,6 +149,7 @@ public class SVM {
         problem.par.C = 100000;
         problem.par.gamma = 0.5;
         SVMModel model= problem.train();
+        System.out.println(model);
 
         int[][] M = problem.confMatrix(model);
         Matrix.show(M);
