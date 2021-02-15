@@ -16,21 +16,24 @@ public class AnalizaGlass {
 	public static void main(String[] args) throws Exception {
 		Instances dane = DataSource.read("zasoby/weka-data/glass.arff");
 		dane.setClass(dane.attribute("Type"));
-//		wypiszDane(dane);
 
-//		wykonajSiecBK2P2(dane);
+		wypiszDane(dane);
 
-//		wykonajSiceBHCGP2(dane);
+		wykonajSiecBK2P2(dane);
 
-//		wykonajSiecBHCLP2(dane);
+		wykonajSiecBK2P5(dane);
 
-//		wykonajSiecBHCGP5(dane);
+		wykonajSiceBHCGP2(dane);
 
-//		wykonajSiecBHCLP5(dane);
+		wykonajSiecBHCGP5(dane);
+
+		wykonajSiecBHCLP2(dane);
+
+		wykonajSiecBHCLP5(dane);
 
 		wykonajSVMC(dane);
 
-//		wykonajSVMNu(dane);
+		wykonajSVMNu(dane);
 
 
 	}
@@ -106,6 +109,19 @@ public class AnalizaGlass {
 		pokazDokladnosc(dane, confM);
 	}
 
+	private static void wykonajSiecBK2P5(Instances dane) throws Exception {
+		int maxNrOfParents=5;
+		// sieć bayesowska k2
+		SiecB bn = SiecB.createK2(maxNrOfParents);
+		bn.buildClassifier(dane);
+		System.out.println("Sieć Bayesowska K2 max rodziców 5:");
+		System.out.println(bn);
+
+		int[][] confM = bn.confMatrix(dane);
+		Matrix.show(confM);
+		pokazDokladnosc(dane, confM);
+	}
+
 
 	private static void wykonajSVMC(Instances dane) throws Exception {
 		Standardize flt = new Standardize();
@@ -126,7 +142,7 @@ public class AnalizaGlass {
 		System.out.println("Walidacja krzyżowa:");
 		double[] celX = new double[danestd.numInstances()];
 		double dokladnosc = problem.crossValidation(problem.par, 10, celX);
-		System.out.printf("Dokładność:\t%.2f\n", dokladnosc*100);
+		System.out.printf("Dokładność:\t%.2f%%\n", dokladnosc*100);
 	}
 
 	private static void wykonajSVMNu(Instances dane) throws Exception {
@@ -136,15 +152,16 @@ public class AnalizaGlass {
 
 		SVMProblem problem = SVMProblem.fromInstances(danestd);
 		problem.par.svm_type = SVMParameter.NU_SVC;
+		problem.par.kernel_type = SVMParameter.RBF;
 		problem.par.nu = 0.25;
 		double[] celX = new double[dane.numInstances()];
 		SVMParameter par = problem.par;
 
-		double[] g = {0.11};//0.1, 0.11, 0.12, 0.15, 0.18};
+		double[] g = {0.15};//0.1, 0.12, 0.15, 0.16, 0.18};
 		for (double gamma:g) {
 			par.gamma = gamma;
 			double dokladnosc = problem.crossValidation(problem.par, 10, celX);
-			System.out.printf("Dokładność:\t%.2f\n", dokladnosc*100);
+			System.out.printf("Dokładność:\t%.2f%%\n", dokladnosc*100);
 			System.out.println("Dla gamma = "+gamma);
 		}
 
